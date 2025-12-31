@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Weather Predictor (Static)</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --accent: #0284c7;
+      --accent-2: #06b6d4;
+      --card: rgba(255,255,255,0.75);
+      --bg: linear-gradient(135deg,#eaf6ff 0%,#ffffff 100%);
+      --muted: #6b7785;
+      --shadow: 0 10px 30px rgba(2,6,23,0.08);
+      --shadow-hover: 0 20px 40px rgba(2,6,23,0.12);
+    }
+
+    *{box-sizing:border-box}
+    body{font-family:Inter,system-ui,Segoe UI,Arial;margin:0;background:var(--bg);color:#073b4c;-webkit-font-smoothing:antialiased}
+    .container{max-width:1100px;margin:48px auto;padding:24px}
+    .card{
+      background:var(--card);
+      border-radius:14px;
+      padding:20px;
+      box-shadow:var(--shadow);
+      margin-bottom:18px;
+      transition:transform .35s cubic-bezier(.2,.9,.2,1), box-shadow .35s;
+      border:1px solid rgba(255,255,255,0.6);
+      backdrop-filter: blur(6px);
+    }
+    .card:hover{transform:translateY(-8px);box-shadow:var(--shadow-hover)}
+    .grid{display:grid;grid-template-columns:1fr 1.4fr;gap:18px}
+    h1{margin:0 0 8px 0;font-weight:800;letter-spacing:-0.02em}
+    label{display:block;margin:8px 0 6px 0;font-weight:600}
+
+    /* Styled range input */
+    input[type=range]{width:100%;appearance:none;height:6px;background:transparent;outline:none;margin:6px 0}
+    input[type=range]::-webkit-slider-runnable-track{height:6px;background:linear-gradient(90deg,rgba(2,132,199,.15),rgba(6,182,212,.12));border-radius:10px}
+    input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:linear-gradient(180deg,var(--accent),var(--accent-2));box-shadow:0 4px 10px rgba(2,132,199,.25);margin-top:-5px;transition:transform .18s}
+    input[type=range]:active::-webkit-slider-thumb{transform:scale(1.08)}
+    input[type=range]::-moz-range-track{height:6px;background:linear-gradient(90deg,rgba(2,132,199,.15),rgba(6,182,212,.12));border-radius:10px}
+    input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:linear-gradient(180deg,var(--accent),var(--accent-2));box-shadow:0 4px 10px rgba(2,132,199,.25)}
+
+    .row{display:flex;gap:12px}
+    .metric{
+      background:linear-gradient(180deg,#ffffff,#f8fdff);
+      padding:14px;border-radius:10px;flex:1;text-align:center;
+      box-shadow:0 6px 18px rgba(2,6,23,0.04);
+      transition:transform .25s, box-shadow .25s;
+      cursor:default;
+    }
+    .metric:hover{transform:translateY(-6px);box-shadow:0 18px 40px rgba(2,6,23,0.08)}
+
+    .btn{
+      background:linear-gradient(180deg,var(--accent),var(--accent-2));
+      color:#fff;padding:10px 16px;border-radius:12px;border:none;font-weight:700;cursor:pointer;
+      box-shadow:0 8px 20px rgba(2,132,199,0.18);transition:transform .18s,box-shadow .18s,filter .18s;
+    }
+    .btn:hover{transform:translateY(-3px);box-shadow:0 14px 30px rgba(2,132,199,0.22);filter:brightness(1.03)}
+    .btn.secondary{background:#6b7280;box-shadow:none}
+
+    .small{font-size:13px;color:var(--muted)}
+    .bar{height:18px;background:linear-gradient(90deg,#e6f8ff,#dbeffc);border-radius:10px;overflow:hidden;box-shadow:inset 0 -2px 6px rgba(0,0,0,0.03)}
+    .bar > div{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent-2));width:0%;transition:width .8s cubic-bezier(.2,.9,.2,1)}
+    .bar > div.high{box-shadow:0 6px 24px rgba(2,132,199,0.28);animation:glow 1.4s infinite alternate}
+
+    @keyframes glow{from{filter:drop-shadow(0 6px 18px rgba(2,132,199,0.12))}to{filter:drop-shadow(0 18px 48px rgba(2,132,199,0.18))}}
+
+    .fade-in{animation:fadeUp .45s ease both}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+    footer{margin-top:18px;color:var(--muted);font-size:13px;text-align:center}
+
+    @media (max-width:800px){.grid{grid-template-columns:1fr;}}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="card">
+      <h1>🌦 Weather Predictor</h1>
+      <p class="small">Standalone HTML demo. Predictions use a sample dataset and a simple linear regression exported from the original Python app.</p>
+    </div>
+
+    <div class="grid">
+      <div class="card">
+        <h3>Inputs</h3>
+        <label>🌡️ Temperature (°C) <span id="tval">30</span></label>
+        <input id="temp" type="range" min="0" max="50" value="30" step="1">
+
+        <label>💧 Humidity (%) <span id="hval">70</span></label>
+        <input id="hum" type="range" min="0" max="100" value="70" step="1">
+
+        <label>🌬️ Wind Speed (km/h) <span id="wval">10</span></label>
+        <input id="wind" type="range" min="0" max="30" value="10" step="1">
+
+        <label>🌧️ Rainfall (mm) — used for predicting condition <span id="rval">10</span></label>
+        <input id="rain" type="range" min="0" max="50" value="10" step="1">
+
+        <div style="margin-top:14px;display:flex;gap:8px">
+          <button id="predict" class="btn">🔍 Predict</button>
+          <button id="reset" class="btn" style="background:#6b7280">Reset</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Results</h3>
+        <div class="row" style="margin-bottom:12px">
+          <div class="metric">
+            <div class="small">Linear Regression</div>
+            <div id="predRain" style="font-size:20px;font-weight:800">—</div>
+            <div class="small">mm</div>
+          </div>
+          <div class="metric">
+            <div class="small">Predicted Condition</div>
+            <div id="predCond" style="font-size:20px;font-weight:800">—</div>
+            <div class="small">Nearest neighbor</div>
+          </div>
+        </div>
+
+        <div class="card" style="padding:12px">
+          <div class="small" style="margin-bottom:8px">Model comparison (Linear regression only in this static demo)</div>
+          <div class="small">Predicted Rainfall</div>
+          <div class="bar" style="margin-top:6px"><div id="barPred" style="width:0%"></div></div>
+          <div style="display:flex;justify-content:space-between;margin-top:6px;font-size:13px"><span id="barTxtLeft">0 mm</span><span id="barTxtRight">50 mm</span></div>
+        </div>
+
+        <div id="neighborBox" style="margin-top:12px"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Exported parameters from Python (pre-computed)
+    const intercept = -2.88574423554962;
+    const coefs = [-0.5633341666327785, 0.4450712055165119, -0.3078185252866783, 1.8170016568128757];
+    // features order: Temperature, Humidity, WindSpeed, Condition
+
+    const dataset = [
+      {"Temperature":25,"Humidity":80,"WindSpeed":10,"Rainfall":10,"Condition":"Cloudy"},
+      {"Temperature":30,"Humidity":65,"WindSpeed":12,"Rainfall":2,"Condition":"Sunny"},
+      {"Temperature":35,"Humidity":55,"WindSpeed":8,"Rainfall":0,"Condition":"Sunny"},
+      {"Temperature":28,"Humidity":70,"WindSpeed":11,"Rainfall":20,"Condition":"Rainy"},
+      {"Temperature":32,"Humidity":60,"WindSpeed":9,"Rainfall":1,"Condition":"Sunny"},
+      {"Temperature":31,"Humidity":75,"WindSpeed":13,"Rainfall":5,"Condition":"Cloudy"},
+      {"Temperature":27,"Humidity":85,"WindSpeed":7,"Rainfall":25,"Condition":"Rainy"},
+      {"Temperature":29,"Humidity":68,"WindSpeed":10,"Rainfall":8,"Condition":"Cloudy"},
+      {"Temperature":34,"Humidity":50,"WindSpeed":12,"Rainfall":0,"Condition":"Sunny"},
+      {"Temperature":33,"Humidity":58,"WindSpeed":11,"Rainfall":4,"Condition":"Cloudy"},
+      {"Temperature":22,"Humidity":90,"WindSpeed":5,"Rainfall":30,"Condition":"Rainy"},
+      {"Temperature":24,"Humidity":82,"WindSpeed":6,"Rainfall":18,"Condition":"Rainy"},
+      {"Temperature":26,"Humidity":77,"WindSpeed":8,"Rainfall":12,"Condition":"Cloudy"},
+      {"Temperature":37,"Humidity":45,"WindSpeed":14,"Rainfall":0,"Condition":"Sunny"},
+      {"Temperature":36,"Humidity":48,"WindSpeed":15,"Rainfall":0,"Condition":"Sunny"}
+    ];
+
+    // Elements
+    const temp = document.getElementById('temp');
+    const hum = document.getElementById('hum');
+    const wind = document.getElementById('wind');
+    const rain = document.getElementById('rain');
+    const tval = document.getElementById('tval');
+    const hval = document.getElementById('hval');
+    const wval = document.getElementById('wval');
+    const rval = document.getElementById('rval');
+    const predRain = document.getElementById('predRain');
+    const predCond = document.getElementById('predCond');
+    const barPred = document.getElementById('barPred');
+    const barTxtLeft = document.getElementById('barTxtLeft');
+    const neighborBox = document.getElementById('neighborBox');
+
+    function updateLabels(){ tval.textContent = temp.value; hval.textContent = hum.value; wval.textContent = wind.value; rval.textContent = rain.value; }
+    [temp,hum,wind,rain].forEach(el=>el.addEventListener('input', updateLabels));
+    updateLabels();
+
+    function predict(){
+      const T = Number(temp.value);
+      const H = Number(hum.value);
+      const W = Number(wind.value);
+      const R = Number(rain.value); // used only for condition NN
+
+      // Use dummy Condition = 0 (like original app) for regression prediction
+      const condDummy = 0;
+      const pred = intercept + coefs[0]*T + coefs[1]*H + coefs[2]*W + coefs[3]*condDummy;
+      const predClamped = Math.max(0, pred); // rainfall can't be negative
+
+      predRain.textContent = predClamped.toFixed(2);
+
+      // Update bar (0-50mm scale) with smooth animation and highlight for large values
+      const pct = Math.max(0, Math.min(100, (predClamped/50)*100));
+      barPred.style.width = pct + '%';
+      barTxtLeft.textContent = predClamped.toFixed(1) + ' mm';
+      if (pct >= 80) { barPred.classList.add('high'); } else { barPred.classList.remove('high'); }
+
+      // Nearest neighbor for Condition (use Temperature, Humidity, WindSpeed, Rainfall)
+      let minD = Infinity; let idx = -1;
+      for(let i=0;i<dataset.length;i++){
+        const d = Math.sqrt(
+          Math.pow(dataset[i].Temperature - T,2) +
+          Math.pow(dataset[i].Humidity - H,2) +
+          Math.pow(dataset[i].WindSpeed - W,2) +
+          Math.pow(dataset[i].Rainfall - R,2)
+        );
+        if(d < minD){ minD = d; idx = i; }
+      }
+      const nn = dataset[idx];
+      predCond.textContent = nn.Condition;
+
+      neighborBox.innerHTML = `<div class=\"card fade-in\" role=\"status\" aria-live=\"polite\"><div class=\"small\">Nearest example (distance ${minD.toFixed(2)})</div>
+        <div style=\"margin-top:8px\"><strong>Temp</strong>: ${nn.Temperature}°C &nbsp; <strong>Hum</strong>: ${nn.Humidity}% &nbsp; <strong>Wind</strong>: ${nn.WindSpeed} km/h &nbsp; <strong>Rain</strong>: ${nn.Rainfall} mm &nbsp; <strong>Cond</strong>: ${nn.Condition}</div></div>`;
+    }
+
+    document.getElementById('predict').addEventListener('click', predict);
+    document.getElementById('reset').addEventListener('click', ()=>{ temp.value=30; hum.value=70; wind.value=10; rain.value=10; updateLabels(); predRain.textContent='—'; predCond.textContent='—'; barPred.style.width='0%'; barPred.classList.remove('high'); neighborBox.innerHTML=''; });
+
+    // Auto-predict on load for a demo
+    predict();
+  </script>
+</body>
+</html>
