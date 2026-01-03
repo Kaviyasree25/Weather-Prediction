@@ -17,7 +17,7 @@ This repo contains two ways to run the Weather Predictor UI:
 
 - Open `weather_predictor_static.html` directly in Chrome (File → Open File), or from PowerShell:
   ```powershell
-  start chrome "file:///d:/Rithul VIT/Software Config Mgmt/Project/Weather-Prediction/weather_predictor_static.html"
+  start chrome "file:///d:/kaviya/Software Config Mgmt/Project/Weather-Prediction/weather_predictor_static.html"
   ```
 - This static version uses a simple exported linear regression model and a nearest-neighbor lookup to predict a weather condition, so it runs entirely in your browser.
 
