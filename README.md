@@ -23,3 +23,5 @@ This repo contains two ways to run the Weather Predictor UI:
 
 Notes:
 - The static demo is intentionally simple; it is designed to work offline and to run purely in the browser. If you'd like a full-featured web app (HTML frontend + Flask/FastAPI backend) that runs locally and uses the trained models, I can scaffold that next.
+
+<img width="1918" height="1021" alt="image" src="https://github.com/user-attachments/assets/94c6390d-ebb3-47ec-ab4a-4edf80e3b62f" />
